@@ -9,30 +9,50 @@
 #include "buzzer.h"
 
 // Tratamento do request do usuário - digite aqui
+// Função que trata requisições do usuário.
+// Recebe como parâmetro um ponteiro para uma string (a requisição HTTP completa).
 void user_request(char **request)
 {
+    // Verifica se a string da requisição contém "GET /alarm_on"
     if (strstr(*request, "GET /alarm_on") != NULL)
     {
+        // Muda estado do buzzer para ativo
         ativar_buzzer();
+
+        // Ativa o sinal PWM para controlar o som do buzzer
         ativar_pwm_buzzer();
+
+        // Muda estado do buzzer para desativado
         desativar_buzzer();
     }
+    // Verifica se a requisição é "GET /alarm_off"
     else if (strstr(*request, "GET /alarm_off") != NULL)
     {
-        //desativar_buzzer();
+        // Seta o estado da prioridade como "DISPLAY_DESATIVADO"
         set_prioridade(DISPLAY_DESATIVADO);
+
+        // Atualiza o display com o novo estado de prioridade
         desenhar_prioridade(get_ssd_pointer());
     }
+    // Verifica se a requisição contém um valor de prioridade na URL
     else if (strstr(*request, "GET /prioridade?valor=") != NULL)
     {
+        // Captura a posição do parâmetro "?valor=" na string da requisição
         char *param_pos = strstr(*request, "?valor=");
 
-        int prioridade = atoi(param_pos+7);
+        // Converte o valor após o parâmetro para um inteiro
+        int prioridade = atoi(param_pos + 7); // pula os 7 caracteres de "?valor="
 
-        if (prioridade>=PRIORIDADE_UM && prioridade<=PRIORIDADE_CINCO) 
+        // Verifica se a prioridade está entre os valores válidos (de 1 a 5, por exemplo)
+        if (prioridade >= PRIORIDADE_UM && prioridade <= PRIORIDADE_CINCO) 
         {
+            // Atualiza a prioridade com o valor recebido
             set_prioridade(prioridade);
+
+            // Atualiza o display com a nova prioridade
             desenhar_prioridade(get_ssd_pointer());
+
+            // Toca o buzzer para indicar que a prioridade foi alterada
             ativar_buzzer();
             ativar_pwm_buzzer();
             desativar_buzzer();
